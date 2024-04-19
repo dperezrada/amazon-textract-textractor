@@ -156,7 +156,11 @@ class LinearizeLayout:
                 yield block['Text']
             elif block["BlockType"] in ["LAYOUT_TITLE", "LAYOUT_SECTION_HEADER"] and "Relationships" in block:
                 # Get the associated LINE text for the layout
-                line_texts = [id2block[line_id]['Text'] for line_id in block["Relationships"][0]['Ids']]
+                line_texts = [
+                    id2block[line_id]['Text']
+                    for line_id in block["Relationships"][0]['Ids']
+                    if 'Text' in id2block[line_id]
+                ]
                 combined_text = ' '.join(line_texts)
 
                 # Prefix with appropriate markdown
