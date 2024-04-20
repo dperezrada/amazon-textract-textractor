@@ -556,3 +556,19 @@ def get_text_from_layout_json(textract_json: dict, **kwargs) -> Dict[str, str]:
     full_text = layout.get_text()
     
     return full_text
+
+def get_figures_text_from_layout_json(textract_json: dict) -> List[str]:
+    """
+    Generates a list of text extracted from figures in the Textract JSON response with LAYOUT.
+
+    Parameters:
+    - textract_json (dict): The Textract response JSON from the AnalyzeDocument API call with LAYOUT feature.
+
+    Returns:
+    List[str]: A list of text extracted from figures in the document.
+    """
+    from .t_pretty_print_layout import LinearizeLayout
+    layout = LinearizeLayout(textract_json=textract_json)
+    layout._get_layout_blocks()
+    figures_text = layout.get_figures_text()
+    return figures_text

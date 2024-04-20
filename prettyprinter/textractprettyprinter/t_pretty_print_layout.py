@@ -234,6 +234,58 @@ class LinearizeLayout:
             self._save_to_files(page_texts)
         return page_texts
 
+    def get_figures_text(self) -> List[List[str]]:
+        """Retrieve the text content for figures."""
+        layouts, id2block = self._get_layout_blocks()
+        figures_texts = []
+        for block in self.j['Blocks']:
+            if block['BlockType'] == 'LAYOUT_FIGURE':
+                figure_text = ""
+                relationships = [
+                    (id, id2block[id])
+                    for rel in block.get('Relationships', [])
+                    for id in rel.get('Ids', [])
+                ]
+                last_value = 0
+                last_diff = 0
+
+                sorted_rel = sorted(
+                    [
+                        {**rel, "id": id}
+                        for id, rel in relationships
+                    ], key=lambda rel: rel['Geometry']['BoundingBox']['Left']
+                )
+
+                last_value = 0
+                current_x_group = -1
+                relations_by_group = {}
+                for rel in sorted_rel:
+                    new_diff = rel['Geometry']['BoundingBox']['Left']  - last_value
+                    last_value = rel['Geometry']['BoundingBox']['Left']
+                    if new_diff > rel['Geometry']['BoundingBox']['Width']/2:
+                        current_x_group += 1
+                    relations_by_group[current_x_group] = relations_by_group.get(current_x_group) or []
+                    relations_by_group[current_x_group].append(rel)
+
+                for current_x_group in sorted(list(relations_by_group.keys())):
+                    sorted_values = sorted(relations_by_group[current_x_group], key=lambda rel: rel['Geometry']['BoundingBox']['Top'])
+                    last_value = sorted_values[0]
+                    next_newline = ''
+                    for rel in sorted_values:
+                        new_diff = rel['Geometry']['BoundingBox']['Top'] - last_value['Geometry']['BoundingBox']['Top']
+                        newlines_value = int((new_diff/rel['Geometry']['BoundingBox']['Height']))
+                        if newlines_value == 1:
+                           newlines_value = 0
+                        elif newlines_value > 2:
+                            newlines_value = newlines_value - 2
+                        if newlines_value > 0:
+                            figure_text += '\n' * newlines_value
+                        figure_text += rel['Text'] + '\n'
+                        last_value = rel
+                figures_texts.append(figure_text)
+        return figures_texts
+
+
 def string_counter():
     # Dictionary to keep track of the occurrences of each string
     occurrences = {}
