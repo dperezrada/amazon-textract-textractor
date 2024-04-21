@@ -571,4 +571,5 @@ def get_figures_text_from_layout_json(textract_json: dict) -> List[str]:
     layout = LinearizeLayout(textract_json=textract_json)
     layout._get_layout_blocks()
     figures_text = layout.get_figures_text()
-    return figures_text
+    figures_blocks = layout.get_figures_blocks()
+    return figures_text, figures_blocks

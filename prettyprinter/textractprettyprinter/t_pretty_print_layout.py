@@ -234,6 +234,15 @@ class LinearizeLayout:
             self._save_to_files(page_texts)
         return page_texts
 
+    def get_figures_blocks(self) -> List[List[str]]:
+        """Retrieve the text content for figures."""
+        self._get_layout_blocks()
+        figures_blocks = []
+        for block in self.j['Blocks']:
+            if block['BlockType'] == 'LAYOUT_FIGURE':
+                figures_blocks.append(block)
+        return figures_blocks
+
     def get_figures_text(self) -> List[List[str]]:
         """Retrieve the text content for figures."""
         layouts, id2block = self._get_layout_blocks()
